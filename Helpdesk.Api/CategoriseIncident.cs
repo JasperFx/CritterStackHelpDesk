@@ -1,15 +1,19 @@
 using Marten;
+using Marten.Schema;
 using Microsoft.AspNetCore.Mvc;
 using Wolverine;
+using Wolverine.Marten;
 
 namespace Helpdesk.Api;
 
-public record CategoriseIncident(
-    Guid IncidentId,
-    IncidentCategory Category,
-    Guid UserId,
-    int Version
-);
+public class CategoriseIncident
+{
+    [Identity]
+    public Guid Id { get; set; }
+    public IncidentCategory Category { get; set; }
+    public Guid UserId { get; set; }
+    public int Version { get; set; }
+}
 
 public class CategoriseIncidentController : ControllerBase
 {
@@ -25,8 +29,8 @@ public class CategoriseIncidentController : ControllerBase
         var userIdClaim = HttpContext.User.FindFirst("user-id");
         // It would probably help if we validate that this exists first,
         // and also that the user Id is actually a Guid. Later...
-        
-        var userId = Guid.Parse(userIdClaim.Value);
+
+        command.UserId = Guid.Parse(userIdClaim.Value);
 
         return bus.InvokeAsync(command);
     }
@@ -35,26 +39,12 @@ public class CategoriseIncidentController : ControllerBase
 
 public static class CategoriseIncidentHandler
 {
-    // This is a long hand version
-    public static async Task Handle(
-        CategoriseIncident command, 
-        IDocumentSession session, 
-        CancellationToken cancellationToken)
+    [AggregateHandler]
+    public static IEnumerable<object> Handle(CategoriseIncident command, IncidentDetails existing)
     {
-        var existing = await session
-            .Events
-            .AggregateStreamAsync<IncidentDetails>(command.IncidentId, token: cancellationToken);
-
-        if (existing == null) return;
-        
         if (existing.Category != command.Category)
         {
-            // Optimistic concurrency
-            var expectedVersion = command.Version + 1;
-            
-            var categorised = new IncidentCategorised(command.Category, command.UserId);
-            session.Events.Append(command.IncidentId, expectedVersion, categorised);
-            await session.SaveChangesAsync(cancellationToken);
+            yield return new IncidentCategorised(command.Category, command.UserId);
         }
     }
 }

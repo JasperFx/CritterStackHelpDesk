@@ -3,6 +3,7 @@ using Marten;
 using Marten.Events.Projections;
 using Oakton;
 using Wolverine;
+using Wolverine.Marten;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,11 +16,14 @@ builder.Services.AddMarten(opts =>
     opts.Connection(connectionString);
     
     opts.Projections.Add<IncidentDetailsProjection>(ProjectionLifecycle.Live);
-});
+})
+    // Adds Wolverine transactional middleware for Marten
+    // and the Wolverine transactional outbox support as well
+    .IntegrateWithWolverine();
 
 builder.Host.UseWolverine(opts =>
 {
-    // More here later
+    opts.Policies.AutoApplyTransactions();
 });
 
 builder.Services.AddControllers();
