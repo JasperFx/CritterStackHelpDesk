@@ -1,48 +1,31 @@
-namespace Helpdesk.Api.Incidents;
+using Marten.Events;
+
+namespace Helpdesk.Api;
 
 public record IncidentLogged(
-    Guid IncidentId,
     Guid CustomerId,
     Contact Contact,
     string Description,
-    Guid LoggedBy,
-    DateTimeOffset LoggedAt
+    Guid LoggedBy
 );
 
-public record IncidentCategorised(
-    Guid IncidentId,
-    IncidentCategory Category,
-    Guid CategorisedBy,
-    DateTimeOffset CategorisedAt
-);
+public record IncidentCategorised(IncidentCategory Category, Guid UserId);
 
-public record IncidentPrioritised(
-    Guid IncidentId,
-    IncidentPriority Priority,
-    Guid PrioritisedBy,
-    DateTimeOffset PrioritisedAt
-);
+public record IncidentPrioritised(IncidentPriority Priority, Guid UserId);
 
-public record AgentAssignedToIncident(
-    Guid IncidentId,
+public record AgentAssignedToIncident(Guid AgentId);
+
+public record AgentRespondedToIncident(        
     Guid AgentId,
-    DateTimeOffset AssignedAt
-);
-
-public record AgentRespondedToIncident(
-    Guid IncidentId,
-    IncidentResponse.FromAgent Response,
-    DateTimeOffset RespondedAt
-);
+    string Content,
+    bool VisibleToCustomer);
 
 public record CustomerRespondedToIncident(
-    Guid IncidentId,
-    IncidentResponse.FromCustomer Response,
-    DateTimeOffset RespondedAt
+    Guid UserId,
+    string Content
 );
 
 public record IncidentResolved(
-    Guid IncidentId,
     ResolutionType Resolution,
     Guid ResolvedBy,
     DateTimeOffset ResolvedAt
@@ -74,8 +57,8 @@ public record Incident(
     bool HasOutstandingResponseToCustomer = false
 )
 {
-    public static Incident Create(IncidentLogged logged) =>
-        new(logged.IncidentId, IncidentStatus.Pending);
+    public static Incident Create(IEvent<IncidentLogged> logged) =>
+        new(logged.Id, IncidentStatus.Pending);
 
     public Incident Apply(AgentRespondedToIncident agentResponded) =>
         this with { HasOutstandingResponseToCustomer = false };
@@ -132,23 +115,4 @@ public record Contact(
     string? PhoneNumber = null
 );
 
-public abstract record IncidentResponse
-{
-    public record FromAgent(
-        Guid AgentId,
-        string Content,
-        bool VisibleToCustomer
-    ): IncidentResponse(Content);
 
-    public record FromCustomer(
-        Guid CustomerId,
-        string Content
-    ): IncidentResponse(Content);
-
-    public string Content { get; init; }
-
-    private IncidentResponse(string content)
-    {
-        Content = content;
-    }
-}

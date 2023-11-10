@@ -12,7 +12,7 @@ namespace Helpdesk.Api.Tests;
 public sealed class AssemblyFixture : XunitTestFramework
 {
     public AssemblyFixture(IMessageSink messageSink)
-        :base(messageSink)
+        : base(messageSink)
     {
         OaktonEnvironment.AutoStartHost = true;
     }
