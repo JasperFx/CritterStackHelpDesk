@@ -7,6 +7,7 @@ using Wolverine.FluentValidation;
 using Wolverine.Http;
 using Wolverine.Http.FluentValidation;
 using Wolverine.Marten;
+using Wolverine.RabbitMQ;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +33,14 @@ builder.Host.UseWolverine(opts =>
     // Fluent Validation validators
     opts.UseFluentValidation();
     opts.Policies.AutoApplyTransactions();
+
+    // Connecting to a local Rabbit MQ broker
+    // at the default port
+    opts.UseRabbitMq();
+
+    // Adding a single Rabbit MQ messaging rule
+    opts.PublishMessage<RingAllTheAlarms>()
+        .ToRabbitExchange("alarms");
 });
 
 builder.Services.AddControllers();
