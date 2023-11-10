@@ -1,4 +1,6 @@
+using Helpdesk.Api;
 using Marten;
+using Marten.Events.Projections;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,6 +8,9 @@ builder.Services.AddMarten(opts =>
 {
     var connectionString = builder.Configuration.GetConnectionString("marten");
     opts.Connection(connectionString);
+    
+    
+    opts.Projections.Add<IncidentDetailsProjection>(ProjectionLifecycle.Live);
 });
 
 builder.Services.AddControllers();
