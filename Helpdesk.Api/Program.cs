@@ -22,7 +22,9 @@ builder.Services.AddMarten(opts =>
 })
     // Adds Wolverine transactional middleware for Marten
     // and the Wolverine transactional outbox support as well
-    .IntegrateWithWolverine();
+    .IntegrateWithWolverine()
+    
+    .EventForwardingToWolverine();
 
 builder.Host.UseWolverine(opts =>
 {

@@ -1,4 +1,5 @@
 using Marten.Events;
+using Marten.Schema;
 
 namespace Helpdesk.Api;
 
@@ -9,7 +10,13 @@ public record IncidentLogged(
     Guid LoggedBy
 );
 
-public record IncidentCategorised(IncidentCategory Category, Guid UserId);
+// Some hacking here that will hopefully be eliminated by Monday. Gulp.
+public class IncidentCategorised
+{
+    public IncidentCategory Category { get; set; }
+    public Guid UserId { get; set; }
+    [Identity] public Guid IncidentId { get; set; }
+}
 
 public record IncidentPrioritised(IncidentPriority Priority, Guid UserId);
 

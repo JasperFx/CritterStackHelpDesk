@@ -49,7 +49,12 @@ public static class CategoriseIncidentEndpoint
     {
         if (existing.Category != command.Category)
         {
-            yield return new IncidentCategorised(command.Category, user.Id);
+            yield return new IncidentCategorised
+            {
+                Category = command.Category,
+                UserId = user.Id,
+                IncidentId = existing.Id
+            };
         }
     }
 }
@@ -64,7 +69,12 @@ public static class CategoriseIncidentHandler
     {
         if (existing.Category != command.Category)
         {
-            yield return new IncidentCategorised(command.Category, SystemId);
+            yield return new IncidentCategorised
+            {
+                Category = command.Category,
+                IncidentId = command.Id, 
+                UserId = SystemId
+            };
         }
     }
 }

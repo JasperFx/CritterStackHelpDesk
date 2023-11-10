@@ -15,7 +15,11 @@ var userId = Guid.NewGuid();
 
 var incidentId = session.Events.StartStream<Incident>(
     new IncidentLogged(Guid.NewGuid(), contact, "Software is crashing",userId),
-    new IncidentCategorised(IncidentCategory.Software, userId),
+    new IncidentCategorised
+    {
+        Category = IncidentCategory.Database,
+        UserId = userId
+    },
     new IncidentPrioritised(IncidentPriority.High, userId)
 ).Id;
 
