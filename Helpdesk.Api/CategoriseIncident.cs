@@ -68,11 +68,15 @@ public static class CategoriseIncidentHandler
     {
         if (existing.Category != command.Category)
         {
+<<<<<<< HEAD
             yield return new IncidentCategorised
             {
                 Category = command.Category,
                 UserId = SystemId
             };
+=======
+            yield return new IncidentCategorised(command.Category, SystemId);
+>>>>>>> 759f974 (Wolverine HTTP endpoints)
         }
     }
 }

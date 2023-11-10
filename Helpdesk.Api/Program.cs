@@ -54,6 +54,12 @@ app.MapWolverineEndpoints(opts =>
     opts.AddMiddleware(typeof(UserDetectionMiddlware));
 });
 
+app.MapWolverineEndpoints(opts =>
+{
+    opts.UseFluentValidationProblemDetailMiddleware();
+    opts.AddMiddleware(typeof(UserDetectionMiddlware));
+});
+
 // This is important for Wolverine/Marten diagnostics 
 // and environment management
 return await app.RunOaktonCommands(args);
