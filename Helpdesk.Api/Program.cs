@@ -1,16 +1,25 @@
 using Helpdesk.Api;
 using Marten;
 using Marten.Events.Projections;
+using Oakton;
+using Wolverine;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Adds in some diagnostics
+builder.Host.ApplyOaktonExtensions();
 
 builder.Services.AddMarten(opts =>
 {
     var connectionString = builder.Configuration.GetConnectionString("marten");
     opts.Connection(connectionString);
     
-    
     opts.Projections.Add<IncidentDetailsProjection>(ProjectionLifecycle.Live);
+});
+
+builder.Host.UseWolverine(opts =>
+{
+    // More here later
 });
 
 builder.Services.AddControllers();
@@ -33,4 +42,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+// This is important for Wolverine/Marten diagnostics 
+// and environment management
+return await app.RunOaktonCommands(args);
