@@ -3,6 +3,9 @@ using Marten;
 using Marten.Events.Projections;
 using Oakton;
 using Wolverine;
+using Wolverine.FluentValidation;
+using Wolverine.Http;
+using Wolverine.Http.FluentValidation;
 using Wolverine.Marten;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +26,9 @@ builder.Services.AddMarten(opts =>
 
 builder.Host.UseWolverine(opts =>
 {
+    // Apply the validation middleware *and* discover and register
+    // Fluent Validation validators
+    opts.UseFluentValidation();
     opts.Policies.AutoApplyTransactions();
 });
 
@@ -40,11 +46,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
 app.MapControllers();
+
+app.MapWolverineEndpoints(opts =>
+{
+    opts.UseFluentValidationProblemDetailMiddleware();
+    opts.AddMiddleware(typeof(UserDetectionMiddlware));
+});
 
 // This is important for Wolverine/Marten diagnostics 
 // and environment management
