@@ -18,7 +18,7 @@ builder.Services.AddMarten(opts =>
     var connectionString = builder.Configuration.GetConnectionString("marten");
     opts.Connection(connectionString);
     
-    opts.Projections.Add<IncidentDetailsProjection>(ProjectionLifecycle.Live);
+    opts.Projections.Add<IncidentDetailsProjection>(ProjectionLifecycle.Inline);
 })
     // Adds Wolverine transactional middleware for Marten
     // and the Wolverine transactional outbox support as well
@@ -45,8 +45,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-app.MapControllers();
 
 app.MapWolverineEndpoints(opts =>
 {
