@@ -8,8 +8,7 @@ public record LogIncident(
     Guid IncidentId,
     Guid CustomerId,
     Contact Contact,
-    string Description,
-    Guid LoggedBy
+    string Description
 );
 
 public class LogIncidentController : ControllerBase
@@ -37,10 +36,10 @@ public class LogIncidentController : ControllerBase
 
         var logged = new IncidentLogged(command.CustomerId, command.Contact, command.Description, userId);
 
-        var incidentId = _session.Events.StartStream<Incident>(logged).Id;
+        _session.Events.StartStream<Incident>(command.IncidentId, logged);
 
         await _session.SaveChangesAsync();
         
-        return Results.Created($"/api/incidents/{incidentId}", incidentId);
+        return Results.Created($"/api/incidents/{command.IncidentId}", command.IncidentId);
     }     
 }

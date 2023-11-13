@@ -3,6 +3,7 @@ using Marten;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Oakton;
+using Wolverine;
 using Wolverine.Tracking;
 using Xunit;
 
@@ -21,7 +22,13 @@ public class AppFixture : IAsyncLifetime
 
         // This is bootstrapping the actual application using
         // its implied Program.Main() set up
-        Host = await AlbaHost.For<Program>(x => { });
+        Host = await AlbaHost.For<Program>(x =>
+        {
+            x.ConfigureServices(services =>
+            {
+                services.DisableAllExternalWolverineTransports();
+            });
+        });
     }
 
     public Task DisposeAsync()
@@ -33,33 +40,7 @@ public class AppFixture : IAsyncLifetime
 
         return Task.CompletedTask;
     }
-
-    private async Task bootstrap(int delay)
-    {
-        if (Host != null)
-        {
-            try
-            {
-                var endpoints = Host.Services.GetRequiredService<EndpointDataSource>().Endpoints;
-                if (endpoints.Count < 5)
-                {
-                    throw new Exception($"Only got {endpoints.Count} endpoints, something is missing!");
-                }
-
-                await Host.GetAsText("/trace");
-                await Task.Delay(delay);
-                return;
-            }
-            catch (Exception e)
-            {
-                await Host.StopAsync();
-                Host = null;
-            }
-        }
-
-
-    }
-
+    
 }
 
 [CollectionDefinition("integration")]
