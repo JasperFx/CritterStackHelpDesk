@@ -1,4 +1,5 @@
 using Marten;
+using Marten.Events;
 using Wolverine;
 using Wolverine.Marten;
 
@@ -14,21 +15,21 @@ public static class IncidentCategorisedHandler
     }
 
     [AggregateHandler]
-    public static (Events, OutgoingMessages) Handle(IncidentCategorised categorised, IncidentDetails details,
+    public static (Events, OutgoingMessages) Handle(IEvent<IncidentCategorised> categorised, IncidentDetails details,
         Customer customer)
     {
         var events = new Events();
         var messages = new OutgoingMessages();
         
-        if (customer.Priorities.TryGetValue(categorised.Category, out var priority))
+        if (customer.Priorities.TryGetValue(categorised.Data.Category, out var priority))
         {
             if (details.Priority != priority)
             {
-                events.Add(new IncidentPrioritised(priority, categorised.UserId));
+                events.Add(new IncidentPrioritised(priority, categorised.Data.UserId));
 
                 if (priority == IncidentPriority.Critical)
                 {
-                    messages.Add(new RingAllTheAlarms(categorised.IncidentId));
+                    messages.Add(new RingAllTheAlarms(categorised.Id));
                 }
             }
         }

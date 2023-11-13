@@ -52,8 +52,7 @@ public static class CategoriseIncidentEndpoint
             yield return new IncidentCategorised
             {
                 Category = command.Category,
-                UserId = user.Id,
-                IncidentId = existing.Id
+                UserId = user.Id
             };
         }
     }
@@ -72,7 +71,6 @@ public static class CategoriseIncidentHandler
             yield return new IncidentCategorised
             {
                 Category = command.Category,
-                IncidentId = command.Id, 
                 UserId = SystemId
             };
         }

@@ -15,7 +15,6 @@ public class IncidentCategorised
 {
     public IncidentCategory Category { get; set; }
     public Guid UserId { get; set; }
-    [Identity] public Guid IncidentId { get; set; }
 }
 
 public record IncidentPrioritised(IncidentPriority Priority, Guid UserId);
