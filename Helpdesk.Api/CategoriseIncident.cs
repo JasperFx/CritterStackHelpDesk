@@ -44,7 +44,7 @@ public static class UserDetectionMiddlware
 
 public static class CategoriseIncidentEndpoint
 {
-    [WolverinePost("/incidents/categorise"), AggregateHandler]
+    [WolverinePost("/api/incidents/categorise"), AggregateHandler]
     public static IEnumerable<object> Post(CategoriseIncident command, IncidentDetails existing, User user)
     {
         if (existing.Category != command.Category)

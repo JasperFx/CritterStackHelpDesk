@@ -10,10 +10,9 @@
     <PackageReference Include="Marten.AspNetCore" Version="6.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.5" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
-    <PackageReference Include="WolverineFx.Marten" Version="1.11.0" />
-    <PackageReference Include="WolverineFx.Http" Version="1.11.0" />
-    <PackageReference Include="WolverineFx.Http.FluentValidation" Version="1.11.0" />
-    <PackageReference Include="WolverineFx.RabbitMQ" Version="1.11.0" />
+    <PackageReference Include="WolverineFx.Marten" Version="1.11.1" />
+    <PackageReference Include="WolverineFx.Http.FluentValidation" Version="1.11.1" />
+    <PackageReference Include="WolverineFx.RabbitMQ" Version="1.11.1" />
   </ItemGroup>
 
 </Project>

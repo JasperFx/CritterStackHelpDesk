@@ -1,8 +1,12 @@
 using Helpdesk.Api;
+using JasperFx.Core;
 using Marten;
 using Marten.Events.Projections;
+using Marten.Exceptions;
+using Npgsql;
 using Oakton;
 using Wolverine;
+using Wolverine.ErrorHandling;
 using Wolverine.FluentValidation;
 using Wolverine.Http;
 using Wolverine.Http.FluentValidation;
@@ -29,18 +33,32 @@ builder.Services.AddMarten(opts =>
 
 builder.Host.UseWolverine(opts =>
 {
+    // Let's build in some durability for transient errors
+    opts.OnException<NpgsqlException>().Or<MartenCommandException>()
+        .RetryWithCooldown(50.Milliseconds(), 100.Milliseconds(), 250.Milliseconds());
+    
     // Apply the validation middleware *and* discover and register
     // Fluent Validation validators
     opts.UseFluentValidation();
+    
+    // Automatic transactional middleware
     opts.Policies.AutoApplyTransactions();
-
+    
+    // Opt into the transactional inbox for local 
+    // queues
+    opts.Policies.UseDurableLocalQueues();
+    
+    // Opt into the transactional inbox/outbox on all messaging
+    // endpoints
+    opts.Policies.UseDurableOutboxOnAllSendingEndpoints();
+    
     // Connecting to a local Rabbit MQ broker
     // at the default port
     opts.UseRabbitMq();
 
     // Adding a single Rabbit MQ messaging rule
     opts.PublishMessage<RingAllTheAlarms>()
-        .ToRabbitExchange("alarms");
+        .ToRabbitExchange("notifications");
 });
 
 builder.Services.AddControllers();
@@ -60,12 +78,9 @@ if (app.Environment.IsDevelopment())
 app.MapWolverineEndpoints(opts =>
 {
     opts.UseFluentValidationProblemDetailMiddleware();
-    opts.AddMiddleware(typeof(UserDetectionMiddlware));
-});
-
-app.MapWolverineEndpoints(opts =>
-{
-    opts.UseFluentValidationProblemDetailMiddleware();
+    
+    // Creates a User object in HTTP requests based on
+    // the "user-id" claim
     opts.AddMiddleware(typeof(UserDetectionMiddlware));
 });
 

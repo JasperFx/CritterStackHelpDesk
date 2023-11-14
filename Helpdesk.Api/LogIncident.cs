@@ -1,45 +1,48 @@
-using JasperFx.Core;
+using FluentValidation;
 using Marten;
 using Microsoft.AspNetCore.Mvc;
+using Wolverine.Attributes;
+using Wolverine.Http;
+using Wolverine.Marten;
 
 namespace Helpdesk.Api;
 
 public record LogIncident(
-    Guid IncidentId,
     Guid CustomerId,
     Contact Contact,
     string Description
-);
-
-public class LogIncidentController : ControllerBase
+)
 {
-    private readonly IDocumentSession _session;
-
-    public LogIncidentController(IDocumentSession session)
+    public class LogIncidentValidator : AbstractValidator<LogIncident>
     {
-        _session = session;
+        public LogIncidentValidator()
+        {
+            RuleFor(x => x.Description).NotEmpty().NotNull();
+            RuleFor(x => x.Contact).NotNull();
+        }
     }
+};
 
-    // TODO -- add some OpenAPI metadata
-    [HttpPost("/api/incidents")]
-    public async Task<IResult> Post([FromBody] LogIncident command)
+public record NewIncidentResponse(Guid IncidentId) : CreationResponse("/api/incidents/" + IncidentId);
+
+public static class LogIncidentEndpoint
+{
+    [WolverineBefore]
+    public static async Task<ProblemDetails> ValidateCustomer(LogIncident command, IDocumentSession session)
     {
-        // TODO -- validation on the input?
-        // TODO -- should we maybe try to prioritize this upfront?
-        // TODO -- should we categorize this somehow?
-        
-        var userIdClaim = HttpContext.User.FindFirst("user-id");
-        // It would probably help if we validate that this exists first,
-        // and also that the user Id is actually a Guid. Later...
-        
-        var userId = Guid.Parse(userIdClaim.Value);
+        var exists = await session.Query<Customer>().AnyAsync(x => x.Id == command.CustomerId);
+        return exists
+            ? WolverineContinue.NoProblems
+            : new ProblemDetails { Detail = $"Unknown customer id {command.CustomerId}" };
+    }
+    
+    [WolverinePost("/api/incidents")]
+    public static (NewIncidentResponse, IStartStream) Post(LogIncident command, User user)
+    {
+        var logged = new IncidentLogged(command.CustomerId, command.Contact, command.Description, user.Id);
 
-        var logged = new IncidentLogged(command.CustomerId, command.Contact, command.Description, userId);
+        var op = MartenOps.StartStream<Incident>(logged);
 
-        _session.Events.StartStream<Incident>(command.IncidentId, logged);
-
-        await _session.SaveChangesAsync();
-        
-        return Results.Created($"/api/incidents/{command.IncidentId}", command.IncidentId);
-    }     
+        return (new NewIncidentResponse(op.StreamId), op);
+    }
 }

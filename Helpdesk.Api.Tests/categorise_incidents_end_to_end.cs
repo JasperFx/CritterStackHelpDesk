@@ -21,7 +21,7 @@ public class categorise_incidents_end_to_end : IntegrationContext
         await Scenario(x =>
         {
             var contact = new Contact(ContactChannel.Email);
-            x.Post.Json(new LogIncident(incidentId, Guid.NewGuid(), contact, "It's broken"));
+            x.Post.Json(new LogIncident(Guid.NewGuid(), contact, "It's broken")).ToUrl("/api/incidents/categorise");
             x.StatusCodeShouldBe(201);
         });
 
