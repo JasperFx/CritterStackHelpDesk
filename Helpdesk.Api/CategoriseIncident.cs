@@ -1,4 +1,6 @@
+using System.Diagnostics;
 using System.Security.Claims;
+using System.Text.Json.Serialization;
 using FluentValidation;
 using Marten;
 using Marten.Schema;
@@ -11,9 +13,13 @@ namespace Helpdesk.Api;
 
 public class CategoriseIncident
 {
-    [Identity]
+    [Identity, JsonPropertyName("Id")]
     public Guid Id { get; set; }
+    
+    [JsonPropertyName("Category")]
     public IncidentCategory Category { get; set; }
+    
+    [JsonPropertyName("Version")]
     public int Version { get; set; }
     
     public class CategoriseIncidentValidator : AbstractValidator<CategoriseIncident>

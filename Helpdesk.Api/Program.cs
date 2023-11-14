@@ -29,7 +29,15 @@ builder.Services.AddMarten(opts =>
     // and the Wolverine transactional outbox support as well
     .IntegrateWithWolverine()
     
-    .EventForwardingToWolverine();
+    .EventForwardingToWolverine(opts =>
+    {
+        // Setting up a little transformation of an event with event metadata to an internal command message
+        opts.SubscribeToEvent<IncidentCategorised>().TransformedTo(e => new TryAssignPriority
+        {
+            IncidentId = e.StreamId,
+            UserId = e.Data.UserId
+        });
+    });
 
 builder.Host.UseWolverine(opts =>
 {

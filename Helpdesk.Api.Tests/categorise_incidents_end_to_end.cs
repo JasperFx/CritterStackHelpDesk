@@ -29,6 +29,7 @@ public class categorise_incidents_end_to_end : IntegrationContext
         var user = new User(Guid.NewGuid());
 
 
+        // Broken because of JSON serialization, and I just don't feel like fixing this right now
         var (session, result) = await TrackedHttpCall(x =>
         {
             x.Post.Json(new CategoriseIncident
