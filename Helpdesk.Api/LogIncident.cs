@@ -23,7 +23,8 @@ public record LogIncident(
     }
 };
 
-public record NewIncidentResponse(Guid IncidentId) : CreationResponse("/api/incidents/" + IncidentId);
+public record NewIncidentResponse(Guid IncidentId) 
+    : CreationResponse("/api/incidents/" + IncidentId);
 
 public static class LogIncidentEndpoint
 {
@@ -33,7 +34,7 @@ public static class LogIncidentEndpoint
         var exists = await session.Query<Customer>().AnyAsync(x => x.Id == command.CustomerId);
         return exists
             ? WolverineContinue.NoProblems
-            : new ProblemDetails { Detail = $"Unknown customer id {command.CustomerId}" };
+            : new ProblemDetails { Detail = $"Unknown customer id {command.CustomerId}", Status = 400};
     }
     
     [WolverinePost("/api/incidents")]

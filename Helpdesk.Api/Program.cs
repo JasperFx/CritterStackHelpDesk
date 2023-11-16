@@ -1,4 +1,5 @@
 using Helpdesk.Api;
+using JasperFx.CodeGeneration;
 using JasperFx.Core;
 using Marten;
 using Marten.Events.Projections;
@@ -41,6 +42,8 @@ builder.Services.AddMarten(opts =>
 
 builder.Host.UseWolverine(opts =>
 {
+    opts.CodeGeneration.TypeLoadMode = TypeLoadMode.Static;
+    
     // Let's build in some durability for transient errors
     opts.OnException<NpgsqlException>().Or<MartenCommandException>()
         .RetryWithCooldown(50.Milliseconds(), 100.Milliseconds(), 250.Milliseconds());
@@ -89,7 +92,7 @@ app.MapWolverineEndpoints(opts =>
     
     // Creates a User object in HTTP requests based on
     // the "user-id" claim
-    opts.AddMiddleware(typeof(UserDetectionMiddlware));
+    opts.AddMiddleware(typeof(UserDetectionMiddleware));
 });
 
 // This is important for Wolverine/Marten diagnostics 

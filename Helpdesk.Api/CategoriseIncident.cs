@@ -34,7 +34,7 @@ public class CategoriseIncident
 
 public record User(Guid Id);
 
-public static class UserDetectionMiddlware
+public static class UserDetectionMiddleware
 {
     public static (User, ProblemDetails) Load(ClaimsPrincipal principal)
     {
@@ -44,7 +44,7 @@ public static class UserDetectionMiddlware
             return (new User(id), WolverineContinue.NoProblems);
         }
         
-        return (new User(Guid.Empty), new ProblemDetails { Detail = "No valid user" });
+        return (new User(Guid.Empty), new ProblemDetails { Detail = "No valid user", Status = 400});
     }
 }
 

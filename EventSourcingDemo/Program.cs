@@ -6,7 +6,7 @@ using Spectre.Console;
 
 // From the docker compose file
 var connectionString = "Host=localhost;Port=5433;Database=postgres;Username=postgres;password=postgres";
-using var store = DocumentStore.For(connectionString);
+await using var store = DocumentStore.For(connectionString);
 
 await using var session = store.LightweightSession();
 
@@ -19,10 +19,13 @@ var incidentId = session.Events.StartStream<Incident>(
     {
         Category = IncidentCategory.Database,
         UserId = userId
-    },
-    new IncidentPrioritised(IncidentPriority.High, userId)
+    }
+    
 ).Id;
 
+await session.SaveChangesAsync();
+
+session.Events.Append(incidentId, new IncidentPrioritised(IncidentPriority.High, userId));
 await session.SaveChangesAsync();
 
 

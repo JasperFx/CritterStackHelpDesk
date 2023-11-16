@@ -1,5 +1,8 @@
+using System.Threading;
 using Alba;
+using Alba.Security;
 using Marten;
+using Marten.Schema;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Oakton;
@@ -22,13 +25,18 @@ public class AppFixture : IAsyncLifetime
 
         // This is bootstrapping the actual application using
         // its implied Program.Main() set up
+        // This is using a library named "Alba". See https://jasperfx.github.io/alba for more information
         Host = await AlbaHost.For<Program>(x =>
         {
             x.ConfigureServices(services =>
             {
                 services.DisableAllExternalWolverineTransports();
+                
+                // We're going to establish some baseline data
+                // for testing
+                services.InitializeMartenWith<BaselineData>();
             });
-        });
+        }, new AuthenticationStub());
     }
 
     public Task DisposeAsync()
@@ -46,6 +54,22 @@ public class AppFixture : IAsyncLifetime
 [CollectionDefinition("integration")]
 public class IntegrationCollection : ICollectionFixture<AppFixture>
 {
+}
+
+public class BaselineData : IInitialData
+{
+    public static Guid Customer1Id { get; } = Guid.NewGuid();
+    
+    public async Task Populate(IDocumentStore store, CancellationToken cancellation)
+    {
+        await using var session = store.LightweightSession();
+        session.Store(new Customer
+        {
+            Id = Customer1Id
+        });
+
+        await session.SaveChangesAsync(cancellation);
+    }
 }
 
 [Collection("integration")]
