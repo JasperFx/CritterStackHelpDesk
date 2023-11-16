@@ -1,3 +1,19 @@
+## Critter Stack Help Desk
+
+This minimal service using [Wolverine](https://wolverine.netlify.app) and [Marten](https://martendb.io) as the sample application
+for the talk [CQRS with Event Sourcing using the “Critter Stack”](https://www.dotnetconf.net/) at .NET Conf 2023.
+
+To run the service, start up a PostgreSQL database and Rabbit MQ broker with:
+
+```bash
+docker compose up -d
+```
+
+from the root of this repository.
+
+
+This sample was stolen from Oskar Dudycz, so see his original take on this system:
+
 [![Twitter Follow](https://img.shields.io/twitter/follow/oskar_at_net?style=social)](https://twitter.com/oskar_at_net) [![Github Sponsors](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&link=https://github.com/sponsors/oskardudycz/)](https://github.com/sponsors/oskardudycz/) [![blog](https://img.shields.io/badge/blog-event--driven.io-brightgreen)](https://event-driven.io/?utm_source=event_sourcing_jvm) [![blog](https://img.shields.io/badge/%F0%9F%9A%80-Architecture%20Weekly-important)](https://www.architecture-weekly.com/?utm_source=event_sourcing_net)
 
 # Pragmatic Event Sourcing With Marten
