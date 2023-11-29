@@ -3,13 +3,15 @@
 This minimal service using [Wolverine](https://wolverine.netlify.app) and [Marten](https://martendb.io) as the sample application
 for the talk [CQRS with Event Sourcing using the “Critter Stack”](https://www.dotnetconf.net/) at .NET Conf 2023.
 
-To run the service, start up a PostgreSQL database and Rabbit MQ broker with:
+To run the service, you will need Docker Desktop or some sort of Docker installation. Assuming you have that running, start up a PostgreSQL database and Rabbit MQ broker with:
 
 ```bash
 docker compose up -d
 ```
 
 from the root of this repository.
+
+The [EventSourcingDemo](https://github.com/JasperFx/CritterStackHelpDesk/tree/main/EventSourcingDemo) project is purely a console application you can run through your IDE tool or with `dotnet run`
 
 
 This sample was stolen from Oskar Dudycz, so see his original take on this system:
