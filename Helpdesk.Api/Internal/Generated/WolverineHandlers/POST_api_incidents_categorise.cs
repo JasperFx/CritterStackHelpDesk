@@ -15,18 +15,18 @@ namespace Internal.Generated.WolverineHandlers
     public class POST_api_incidents_categorise : Wolverine.Http.HttpHandler
     {
         private readonly Wolverine.Http.WolverineHttpOptions _wolverineHttpOptions;
+        private readonly Wolverine.Runtime.IWolverineRuntime _wolverineRuntime;
+        private readonly FluentValidation.IValidator<Helpdesk.Api.CategoriseIncident> _validator;
         private readonly Wolverine.Marten.Publishing.OutboxedSessionFactory _outboxedSessionFactory;
         private readonly Wolverine.Http.FluentValidation.IProblemDetailSource<Helpdesk.Api.CategoriseIncident> _problemDetailSource;
-        private readonly FluentValidation.IValidator<Helpdesk.Api.CategoriseIncident> _validator;
-        private readonly Wolverine.Runtime.IWolverineRuntime _wolverineRuntime;
 
-        public POST_api_incidents_categorise(Wolverine.Http.WolverineHttpOptions wolverineHttpOptions, Wolverine.Marten.Publishing.OutboxedSessionFactory outboxedSessionFactory, Wolverine.Http.FluentValidation.IProblemDetailSource<Helpdesk.Api.CategoriseIncident> problemDetailSource, FluentValidation.IValidator<Helpdesk.Api.CategoriseIncident> validator, Wolverine.Runtime.IWolverineRuntime wolverineRuntime) : base(wolverineHttpOptions)
+        public POST_api_incidents_categorise(Wolverine.Http.WolverineHttpOptions wolverineHttpOptions, Wolverine.Runtime.IWolverineRuntime wolverineRuntime, FluentValidation.IValidator<Helpdesk.Api.CategoriseIncident> validator, Wolverine.Marten.Publishing.OutboxedSessionFactory outboxedSessionFactory, Wolverine.Http.FluentValidation.IProblemDetailSource<Helpdesk.Api.CategoriseIncident> problemDetailSource) : base(wolverineHttpOptions)
         {
             _wolverineHttpOptions = wolverineHttpOptions;
+            _wolverineRuntime = wolverineRuntime;
+            _validator = validator;
             _outboxedSessionFactory = outboxedSessionFactory;
             _problemDetailSource = problemDetailSource;
-            _validator = validator;
-            _wolverineRuntime = wolverineRuntime;
         }
 
 

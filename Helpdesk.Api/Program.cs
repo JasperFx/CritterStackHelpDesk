@@ -25,6 +25,9 @@ builder.Services.AddMarten(opts =>
     opts.Connection(connectionString);
     
     opts.Projections.Add<IncidentDetailsProjection>(ProjectionLifecycle.Inline);
+
+    // This will create a btree index within the JSONB data
+    opts.Schema.For<Customer>().Index(x => x.Region);
 })
     // Adds Wolverine transactional middleware for Marten
     // and the Wolverine transactional outbox support as well
@@ -70,6 +73,26 @@ builder.Host.UseWolverine(opts =>
     // Adding a single Rabbit MQ messaging rule
     opts.PublishMessage<RingAllTheAlarms>()
         .ToRabbitExchange("notifications");
+
+    opts.LocalQueueFor<TryAssignPriority>()
+        // By default, local queues allow for parallel processing with a maximum
+        // parallel count equal to the number of processors on the executing
+        // machine, but you can override the queue to be sequential and single file
+        .Sequential()
+
+        // Or add more to the maximum parallel count!
+        .MaximumParallelMessages(10);
+    
+    // Or if so desired, you can route specific messages to 
+    // specific local queues when ordering is important
+    opts.Policies.DisableConventionalLocalRouting();
+    opts.Publish(x =>
+    {
+        x.Message<TryAssignPriority>();
+        x.Message<CategoriseIncident>();
+
+        x.ToLocalQueue("commands").Sequential();
+    });
 });
 
 builder.Services.AddControllers();
@@ -88,6 +111,9 @@ if (app.Environment.IsDevelopment())
 
 app.MapWolverineEndpoints(opts =>
 {
+    // Direct Wolverine.HTTP to use Fluent Validation
+    // middleware to validate any request bodies where
+    // there's a known validator (or many validators)
     opts.UseFluentValidationProblemDetailMiddleware();
     
     // Creates a User object in HTTP requests based on

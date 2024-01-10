@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using FluentValidation;
 using Marten;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +16,9 @@ public record LogIncident(
 {
     public class LogIncidentValidator : AbstractValidator<LogIncident>
     {
+        // I stole this idea of using inner classes to keep them
+        // close to the actual model from *someone* online,
+        // but don't remember who
         public LogIncidentValidator()
         {
             RuleFor(x => x.Description).NotEmpty().NotNull();
@@ -29,7 +33,11 @@ public record NewIncidentResponse(Guid IncidentId)
 public static class LogIncidentEndpoint
 {
     [WolverineBefore]
-    public static async Task<ProblemDetails> ValidateCustomer(LogIncident command, IDocumentSession session)
+    public static async Task<ProblemDetails> ValidateCustomer(
+        LogIncident command, 
+        
+        // Method injection works just fine within middleware too
+        IDocumentSession session)
     {
         var exists = await session.Query<Customer>().AnyAsync(x => x.Id == command.CustomerId);
         return exists
@@ -40,10 +48,15 @@ public static class LogIncidentEndpoint
     [WolverinePost("/api/incidents")]
     public static (NewIncidentResponse, IStartStream) Post(LogIncident command, User user)
     {
-        var logged = new IncidentLogged(command.CustomerId, command.Contact, command.Description, user.Id);
+        var logged = new IncidentLogged(
+            command.CustomerId, 
+            command.Contact, 
+            command.Description, 
+            user.Id);
 
         var op = MartenOps.StartStream<Incident>(logged);
-
+        
         return (new NewIncidentResponse(op.StreamId), op);
     }
+
 }

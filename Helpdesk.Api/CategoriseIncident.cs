@@ -32,6 +32,9 @@ public class CategoriseIncident
     }
 }
 
+// Using the custom type makes it easier
+// for the Wolverine code generation to route
+// things around. I'm not ashamed.
 public record User(Guid Id);
 
 public static class UserDetectionMiddleware
@@ -41,9 +44,12 @@ public static class UserDetectionMiddleware
         var userIdClaim = principal.FindFirst("user-id");
         if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out var id))
         {
+            // Everything is good, keep on trucking with this request!
             return (new User(id), WolverineContinue.NoProblems);
         }
         
+        // Nope, nope, nope. We got problems, so stop the presses and emit a ProblemDetails response
+        // with a 400 status code telling the caller that there's no valid user for this request
         return (new User(Guid.Empty), new ProblemDetails { Detail = "No valid user", Status = 400});
     }
 }
@@ -70,15 +76,25 @@ public static class CategoriseIncidentHandler
     public static readonly Guid SystemId = Guid.NewGuid();
     
     [AggregateHandler]
-    public static IEnumerable<object> Handle(CategoriseIncident command, IncidentDetails existing)
+    // The object? as return value will be interpreted
+    // by Wolverine as appending one or zero events
+    public static async Task<object?> Handle(
+        CategoriseIncident command, 
+        IncidentDetails existing,
+        IMessageBus bus)
     {
         if (existing.Category != command.Category)
         {
-            yield return new IncidentCategorised
+            // Send the message to any and all subscribers to this message
+            await bus.PublishAsync(new TryAssignPriority { IncidentId = existing.Id });
+            return new IncidentCategorised
             {
                 Category = command.Category,
                 UserId = SystemId
             };
         }
+
+        // Wolverine will interpret this as "do no work"
+        return null;
     }
 }

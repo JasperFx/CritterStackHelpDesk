@@ -12,6 +12,7 @@ public class TryAssignPriority
 {
     [Identity]
     public Guid IncidentId { get; set; }
+    
     public Guid UserId { get; set; }
 }
 

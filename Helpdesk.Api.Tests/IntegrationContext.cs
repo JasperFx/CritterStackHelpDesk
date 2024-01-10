@@ -1,6 +1,7 @@
 using System.Threading;
 using Alba;
 using Alba.Security;
+using JasperFx.Core;
 using Marten;
 using Marten.Schema;
 using Microsoft.AspNetCore.Routing;
@@ -16,6 +17,8 @@ public class AppFixture : IAsyncLifetime
 {
     public IAlbaHost Host { get; private set; }
 
+    // This is a one time initialization of the
+    // system under test before the first usage
     public async Task InitializeAsync()
     {
         // Sorry folks, but this is absolutely necessary if you 
@@ -48,9 +51,9 @@ public class AppFixture : IAsyncLifetime
 
         return Task.CompletedTask;
     }
-    
 }
 
+// xUnit specific junk
 [CollectionDefinition("integration")]
 public class IntegrationCollection : ICollectionFixture<AppFixture>
 {
@@ -65,7 +68,9 @@ public class BaselineData : IInitialData
         await using var session = store.LightweightSession();
         session.Store(new Customer
         {
-            Id = Customer1Id
+            Id = Customer1Id,
+            Region = "West Cost",
+            Duration = new ContractDuration(DateOnly.FromDateTime(DateTime.Today.Subtract(100.Days())), DateOnly.FromDateTime(DateTime.Today.Add(100.Days())))
         });
 
         await session.SaveChangesAsync(cancellation);
