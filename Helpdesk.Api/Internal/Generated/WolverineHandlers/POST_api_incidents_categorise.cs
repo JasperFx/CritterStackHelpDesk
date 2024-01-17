@@ -15,18 +15,18 @@ namespace Internal.Generated.WolverineHandlers
     public class POST_api_incidents_categorise : Wolverine.Http.HttpHandler
     {
         private readonly Wolverine.Http.WolverineHttpOptions _wolverineHttpOptions;
-        private readonly Wolverine.Runtime.IWolverineRuntime _wolverineRuntime;
-        private readonly FluentValidation.IValidator<Helpdesk.Api.CategoriseIncident> _validator;
         private readonly Wolverine.Marten.Publishing.OutboxedSessionFactory _outboxedSessionFactory;
+        private readonly FluentValidation.IValidator<Helpdesk.Api.CategoriseIncident> _validator;
         private readonly Wolverine.Http.FluentValidation.IProblemDetailSource<Helpdesk.Api.CategoriseIncident> _problemDetailSource;
+        private readonly Wolverine.Runtime.IWolverineRuntime _wolverineRuntime;
 
-        public POST_api_incidents_categorise(Wolverine.Http.WolverineHttpOptions wolverineHttpOptions, Wolverine.Runtime.IWolverineRuntime wolverineRuntime, FluentValidation.IValidator<Helpdesk.Api.CategoriseIncident> validator, Wolverine.Marten.Publishing.OutboxedSessionFactory outboxedSessionFactory, Wolverine.Http.FluentValidation.IProblemDetailSource<Helpdesk.Api.CategoriseIncident> problemDetailSource) : base(wolverineHttpOptions)
+        public POST_api_incidents_categorise(Wolverine.Http.WolverineHttpOptions wolverineHttpOptions, Wolverine.Marten.Publishing.OutboxedSessionFactory outboxedSessionFactory, FluentValidation.IValidator<Helpdesk.Api.CategoriseIncident> validator, Wolverine.Http.FluentValidation.IProblemDetailSource<Helpdesk.Api.CategoriseIncident> problemDetailSource, Wolverine.Runtime.IWolverineRuntime wolverineRuntime) : base(wolverineHttpOptions)
         {
             _wolverineHttpOptions = wolverineHttpOptions;
-            _wolverineRuntime = wolverineRuntime;
-            _validator = validator;
             _outboxedSessionFactory = outboxedSessionFactory;
+            _validator = validator;
             _problemDetailSource = problemDetailSource;
+            _wolverineRuntime = wolverineRuntime;
         }
 
 
@@ -66,16 +66,21 @@ namespace Internal.Generated.WolverineHandlers
 
             
             // The actual HTTP request handler execution
-            var objectIEnumerable = Helpdesk.Api.CategoriseIncidentEndpoint.Post(command, eventStream.Aggregate, user);
+            (var events, var outgoingMessages) = Helpdesk.Api.CategoriseIncidentEndpoint.Post(command, eventStream.Aggregate, user);
 
-            if (objectIEnumerable != null)
+            if (events != null)
             {
                 
                 // Capturing any possible events returned from the command handlers
-                eventStream.AppendMany(objectIEnumerable);
+                eventStream.AppendMany(events);
 
             }
 
+            
+            // Outgoing, cascaded message
+            await messageContext.EnqueueCascadingAsync(outgoingMessages).ConfigureAwait(false);
+
+            await messageContext.FlushOutgoingMessagesAsync().ConfigureAwait(false);
             await documentSession.SaveChangesAsync(httpContext.RequestAborted).ConfigureAwait(false);
             // Wolverine automatically sets the status code to 204 for empty responses
             if (!httpContext.Response.HasStarted) httpContext.Response.StatusCode = 204;

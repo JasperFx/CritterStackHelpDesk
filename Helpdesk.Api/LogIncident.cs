@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using FluentValidation;
 using Marten;
 using Microsoft.AspNetCore.Mvc;
@@ -39,7 +38,10 @@ public static class LogIncidentEndpoint
         // Method injection works just fine within middleware too
         IDocumentSession session)
     {
-        var exists = await session.Query<Customer>().AnyAsync(x => x.Id == command.CustomerId);
+        var exists = await session
+            .Query<Customer>()
+            .AnyAsync(x => x.Id == command.CustomerId);
+        
         return exists
             ? WolverineContinue.NoProblems
             : new ProblemDetails { Detail = $"Unknown customer id {command.CustomerId}", Status = 400};

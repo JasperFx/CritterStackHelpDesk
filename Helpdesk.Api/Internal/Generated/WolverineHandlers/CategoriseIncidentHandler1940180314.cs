@@ -9,15 +9,15 @@ namespace Internal.Generated.WolverineHandlers
     // START: CategoriseIncidentHandler1940180314
     public class CategoriseIncidentHandler1940180314 : Wolverine.Runtime.Handlers.MessageHandler
     {
-        private readonly FluentValidation.IValidator<Helpdesk.Api.CategoriseIncident> _validator;
         private readonly Wolverine.Marten.Publishing.OutboxedSessionFactory _outboxedSessionFactory;
-        private readonly Wolverine.FluentValidation.IFailureAction<Helpdesk.Api.CategoriseIncident> _failureAction_of_CategoriseIncident_1945519099;
+        private readonly FluentValidation.IValidator<Helpdesk.Api.CategoriseIncident> _validator;
+        private readonly Wolverine.FluentValidation.IFailureAction<Helpdesk.Api.CategoriseIncident> _failureAction_of_CategoriseIncident_1802067412;
 
-        public CategoriseIncidentHandler1940180314(FluentValidation.IValidator<Helpdesk.Api.CategoriseIncident> validator, Wolverine.Marten.Publishing.OutboxedSessionFactory outboxedSessionFactory, [Lamar.Named("failureAction2")] Wolverine.FluentValidation.IFailureAction<Helpdesk.Api.CategoriseIncident> failureAction_of_CategoriseIncident_1945519099)
+        public CategoriseIncidentHandler1940180314(Wolverine.Marten.Publishing.OutboxedSessionFactory outboxedSessionFactory, FluentValidation.IValidator<Helpdesk.Api.CategoriseIncident> validator, [Lamar.Named("failureAction2")] Wolverine.FluentValidation.IFailureAction<Helpdesk.Api.CategoriseIncident> failureAction_of_CategoriseIncident_1802067412)
         {
-            _validator = validator;
             _outboxedSessionFactory = outboxedSessionFactory;
-            _failureAction_of_CategoriseIncident_1945519099 = failureAction_of_CategoriseIncident_1945519099;
+            _validator = validator;
+            _failureAction_of_CategoriseIncident_1802067412 = failureAction_of_CategoriseIncident_1802067412;
         }
 
 
@@ -27,7 +27,7 @@ namespace Internal.Generated.WolverineHandlers
             // The actual message body
             var categoriseIncident = (Helpdesk.Api.CategoriseIncident)context.Envelope.Message;
 
-            await Wolverine.FluentValidation.Internals.FluentValidationExecutor.ExecuteOne<Helpdesk.Api.CategoriseIncident>(_validator, _failureAction_of_CategoriseIncident_1945519099, categoriseIncident).ConfigureAwait(false);
+            await Wolverine.FluentValidation.Internals.FluentValidationExecutor.ExecuteOne<Helpdesk.Api.CategoriseIncident>(_validator, _failureAction_of_CategoriseIncident_1802067412, categoriseIncident).ConfigureAwait(false);
             await using var documentSession = _outboxedSessionFactory.OpenSession(context);
             var eventStore = documentSession.Events;
             
